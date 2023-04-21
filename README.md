@@ -18,7 +18,7 @@ Run :
 
 ## Running the example service client
 
-This example scripts provides you with credentials based on service authentication.
+This example script provides you with credentials based on service authentication.
 
 ```bash
 python3 -m pip install -r requirements.txt
