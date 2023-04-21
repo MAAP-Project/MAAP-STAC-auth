@@ -50,7 +50,7 @@ class Creds(pydantic.BaseModel):
 class Settings(pydantic.BaseSettings):
     stack_base: str
     stage: str
-    service_id: str
+    stac_register_service_id: str
 
     @property
     def stack_name(self) -> str:
@@ -58,7 +58,7 @@ class Settings(pydantic.BaseSettings):
 
     def get_cognito_service_details(self) -> "CognitoClientDetails":
         client = boto3.client("secretsmanager")
-        secret_id = f"{self.stack_name}/{self.service_id}"
+        secret_id = f"{self.stack_name}/{self.stac_register_service_id}"
         try:
             response = client.get_secret_value(SecretId=secret_id)
         except client.exceptions.ResourceNotFoundException:
@@ -77,6 +77,7 @@ if __name__ == "__main__":
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
+    os.chdir('../')
     client_details = Settings(_env_file=os.environ.get("ENV_FILE", ".env")).get_cognito_service_details()
     credentials = get_token(client_details)
     print(credentials.json())

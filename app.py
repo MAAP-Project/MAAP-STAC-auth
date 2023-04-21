@@ -11,7 +11,7 @@ config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 app = cdk.App()
 stack = AuthStack(
     app,
-    f"maap-auth-stack-{config.stage}",
+    f"{config.stack_base}-{config.stage}",
     tags={
         "Project": "MAAP",
         "Owner": config.owner,
@@ -37,7 +37,7 @@ stac_registry_scopes = stack.add_resource_server(
 # In this case, we want this client to be able to only register new STAC ingestions in
 # the STAC ingestion registry service.
 stack.add_service_client(
-    "MAAP-workflows",
+    config.stac_register_service_id,
     scopes=[
         stac_registry_scopes["stac:register"],
     ],

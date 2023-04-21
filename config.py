@@ -14,6 +14,22 @@ class Config(pydantic.BaseSettings):
         ),
         default_factory=getuser,
     )
+    stack_base: str = pydantic.Field(
+        description=" ".join(
+            [
+                "prefix of the stack name.",
+            ]
+        ),
+        default_factory=getuser,
+    )
+    stac_register_service_id: str = pydantic.Field(
+        description=" ".join(
+            [
+                "name of the service id with the stack:register scope.",
+            ]
+        ),
+        default_factory=getuser,
+    )
     owner: str = pydantic.Field(
         description=" ".join(
             [
