@@ -4,6 +4,18 @@ This codebase represents the Cognito-based authentication system used for the MA
 
 Note: This is for setting up the user pools and managing applications, it is _not_ for managing users. Managing users should be instead done via AWS
 
+## Deploying
+
+### Requirements
+
+- `docker` is running
+- the AWS CDK CLI is installed
+- verify the configuration in `.env`. 
+
+Run : 
+- `cdk synth --all`
+- `cdk deploy --all`
+
 ## Running the example service client
 
 This example scripts provides you with credentials based on service authentication.
