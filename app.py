@@ -11,11 +11,11 @@ config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 app = cdk.App()
 stack = AuthStack(
     app,
-    f"MAAP-auth-stack-{config.stage}",
+    f"maap-auth-stack-{config.stage}",
     tags={
         "Project": "MAAP",
         "Owner": config.owner,
-        "Client": "aws",
+        "Client": "NASA",
         "Stack": config.stage,
     },
 )
@@ -41,7 +41,6 @@ stack.add_service_client(
     scopes=[
         stac_registry_scopes["stac:register"],
     ],
-    replica_regions=['eu-central-1']
 )
 
 # Programmatic Clients

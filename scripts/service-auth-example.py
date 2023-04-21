@@ -71,6 +71,12 @@ class Settings(pydantic.BaseSettings):
 
 
 if __name__ == "__main__":
-    client_details = Settings().get_cognito_service_details()
+    
+    
+    import os
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+    client_details = Settings(_env_file=os.environ.get("ENV_FILE", ".env")).get_cognito_service_details()
     credentials = get_token(client_details)
     print(credentials.json())

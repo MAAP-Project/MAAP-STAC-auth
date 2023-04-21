@@ -188,7 +188,7 @@ class AuthStack(Stack):
             self,
             f"{service_id}-secret",
             secret_name=f"{stack_name}/{service_id}",
-            description="Client secret, created by VEDA Auth CDK.",
+            description="Client secret, created by MAAP Auth CDK.",
             # TODO: Should we not do this? Perhaps the client secret should be placed in
             # a secret in a Lambda custom resource so as to avoid placing the secret in
             # CloudFormation template.
