@@ -3,15 +3,16 @@ import os
 
 import aws_cdk as cdk
 
-from infra.stack import AuthStack
+from infra.AuthStack import AuthStack
+from infra.RolesStack import RolesStack
 from config import Config
 
 config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 
 app = cdk.App()
-stack = AuthStack(
+auth_stac = AuthStack(
     app,
-    f"{config.stack_base}-{config.stage}",
+    f"MAAP-STAC-auth-{config.stage}",
     tags={
         "Project": "MAAP",
         "Owner": config.owner,
@@ -23,8 +24,8 @@ stack = AuthStack(
 
 # Generate a resource server (ie something to protect behind auth) with scopes
 # (permissions that we can grant to users/services).
-stac_registry_scopes = stack.add_resource_server(
-    "MAAP-stac-ingestion-registry",
+stac_registry_scopes = auth_stac.add_resource_server(
+    "MAAP-STAC-ingestion-registry",
     supported_scopes={
         "stac:register": "Create STAC ingestions",
         "stac:cancel": "Cancel a STAC ingestion",
@@ -36,7 +37,7 @@ stac_registry_scopes = stack.add_resource_server(
 # Generate a client for a service, specifying the permissions it will be granted.
 # In this case, we want this client to be able to only register new STAC ingestions in
 # the STAC ingestion registry service.
-stack.add_service_client(
+auth_stac.add_service_client(
     config.stac_register_service_id,
     scopes=[
         stac_registry_scopes["stac:register"],
@@ -44,6 +45,22 @@ stack.add_service_client(
 )
 
 # Programmatic Clients
-# stack.add_user_client("MAAP-sdk")
+# auth_stac.add_user_client("MAAP-sdk")
+
+
+
+# create roles stack
+auth_stac = RolesStack(
+    app,
+    f"MAAP-STAC-roles-{config.stage}",
+    tags={
+        "Project": "MAAP",
+        "Owner": config.owner,
+        "Client": "NASA",
+        "Stack": config.stage,
+    },
+    data_pipeline_role_name=config.data_pipeline_role_name,
+    stac_ingestor_role_name=config.stac_ingestor_role_name
+)
 
 app.synth()

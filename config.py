@@ -40,3 +40,18 @@ class Config(pydantic.BaseSettings):
         ),
         default_factory=getuser,
     )
+    data_pipeline_role_name: str = pydantic.Field(
+        description=" ".join(
+            [
+                "name of the role that will be used by the data pipeline",
+            ]
+        ),
+        default_factory=getuser,
+    )
+    stac_ingestor_role_name: str = pydantic.Field(
+        description=" ".join(
+            [
+                "name of the role that will be used by the stac ingestion service",
+            ]
+        ),
+    )
