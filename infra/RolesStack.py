@@ -1,43 +1,41 @@
-from typing import Optional
-
-
 from aws_cdk import (
     aws_iam as iam,
-    aws_s3 as s3,
     CfnOutput,
     Stack,
 )
+import boto3
 from constructs import Construct
 
+DATA_PIPELINE_LAMBDA_EXECUTION_ROLE_PATTERN = "maap-data-pipelines-*-datapipelinelambdarole*"
+STAC_INGESTOR_EXECUTION_ROLE_PATTERN = 'MAAP-STAC-*-pgSTAC-stacingestorexecutionrole*'
+
 class RolesStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, data_pipeline_role_name: str, stac_ingestor_role_name: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
-        self.create_data_access_role(construct_id=construct_id, data_pipeline_role_name=data_pipeline_role_name, stac_ingestor_role_name=stac_ingestor_role_name)
+        self.create_data_access_role()
 
         # export a cloud formation output with the data access role name and arn
         CfnOutput(
             self,
-            "data access role name",
-            export_name=f"data-access-role-name-{self.stack_name}",
-            value=self.data_access_role.role_name
+            "data access role arn",
+            export_name=f"data-access-role-arn",
+            value=self.data_access_role.role_arn
         )
             
     def create_data_access_role(
-        self, construct_id: str, data_pipeline_role_name: str, stac_ingestor_role_name: str
+        self
     ):
         """
         Creates data access role, attaches inline policy to allow access to s3 buckets, and grants assume role to data pipeline and stac ingestor roles
         """
         
-        role_assume = iam.CompositePrincipal(iam.ServicePrincipal("lambda.amazonaws.com"))
-        
         role = iam.Role(
             self,
-            f"{construct_id}-data-access-role",
-            role_name=f"{construct_id}-data-access-role",
-            assumed_by=role_assume,
+            "data-access-role",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com")
         )
+        
         
         buckets = [
                 "nasa-maap-data-store",
@@ -64,12 +62,23 @@ class RolesStack(Stack):
             )
         )
         
-        data_pipeline_role = iam.Role.from_role_name(self, 'data-pipeline-role', data_pipeline_role_name)
-        
-        stac_ingestor_role = iam.Role.from_role_name(self, 'stac-ingestor-role', stac_ingestor_role_name)
-        
-        role.grant_assume_role(data_pipeline_role)
-        role.grant_assume_role(stac_ingestor_role)
+        account_id = boto3.client("sts").get_caller_identity().get("Account")
+
+        role.assume_role_policy.add_statements(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                principals=[iam.AnyPrincipal()],
+                actions=["sts:AssumeRole"],
+                conditions={
+                    "StringLike": {
+                        "aws:PrincipalArn": [
+                            f"arn:aws:iam::{account_id}:role/{DATA_PIPELINE_LAMBDA_EXECUTION_ROLE_PATTERN}",
+                            f"arn:aws:iam::{account_id}:role/{STAC_INGESTOR_EXECUTION_ROLE_PATTERN}"
+                        ]
+                    }
+                }
+            )
+        )
         
         self.data_access_role = role
         

@@ -48,7 +48,6 @@ auth_stac.add_service_client(
 # auth_stac.add_user_client("MAAP-sdk")
 
 
-
 # create roles stack
 auth_stac = RolesStack(
     app,
@@ -58,9 +57,7 @@ auth_stac = RolesStack(
         "Owner": config.owner,
         "Client": "NASA",
         "Stack": config.stage,
-    },
-    data_pipeline_role_name=config.data_pipeline_role_name,
-    stac_ingestor_role_name=config.stac_ingestor_role_name
+    }
 )
 
 app.synth()
