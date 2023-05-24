@@ -48,13 +48,12 @@ class Creds(pydantic.BaseModel):
 
 
 class Settings(pydantic.BaseSettings):
-    stack_base: str
     stage: str
     stac_register_service_id: str
 
     @property
     def stack_name(self) -> str:
-        return f"{self.stack_base}-{self.stage}"
+        return f"MAAP-STAC-auth-{self.stage}"
 
     def get_cognito_service_details(self) -> "CognitoClientDetails":
         client = boto3.client("secretsmanager")
