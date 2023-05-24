@@ -55,7 +55,7 @@ class RolesStack(Stack):
                 statements=[
                     iam.PolicyStatement(
                         effect=iam.Effect.ALLOW,
-                        actions=["s3:PutObject*", "s3:ListBucket*", "s3:GetObject*"],
+                        actions=["s3:ListBucket*", "s3:GetObject*"],
                         resources=[f"arn:aws:s3:::{bucket}" for bucket in buckets],
                     )
                 ],
