@@ -51,7 +51,7 @@ class RolesStack(Stack):
         role.attach_inline_policy(
             iam.Policy(
                 self,
-                "Policy",
+                "bucket-access-policy",
                 statements=[
                     iam.PolicyStatement(
                         effect=iam.Effect.ALLOW,
