@@ -130,7 +130,7 @@ class AuthStack(Stack):
 
         domain = userpool.add_domain(
             "cognito-domain",
-            cognito_domain=cognito.CognitoDomainOptions(domain_prefix=stack_name),
+            cognito_domain=cognito.CognitoDomainOptions(domain_prefix=stack_name.lower()),
         )
 
         CfnOutput(
