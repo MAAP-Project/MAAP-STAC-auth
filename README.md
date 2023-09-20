@@ -9,12 +9,27 @@ Note : Managing cognito users should be done via the console.
 ### Requirements
 
 - `docker` is running
-- the AWS CDK CLI is installed
+- the AWS CDK CLI is installed. 
 - verify the configuration in `.env`. 
 
+### Install dependencies
+
+Run
+
+```
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+### Deploy
+
 Run : 
-- `cdk synth --all`
-- `cdk deploy --all`
+
+```
+cdk synth --all
+cdk deploy --all
+```
 
 ## Cognito resources
 
