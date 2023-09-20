@@ -7,7 +7,7 @@ import boto3
 from constructs import Construct
 
 DATA_PIPELINE_LAMBDA_EXECUTION_ROLE_PATTERN = "maap-data-pipelines-*-datapipelinelambdarole*"
-STAC_INGESTOR_EXECUTION_ROLE_PATTERN = 'MAAP-STAC-*-pgSTAC-stacingestorexecutionrole*'
+STAC_INGESTOR_EXECUTION_ROLE_PATTERN = 'stacingestor'
 
 class RolesStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
