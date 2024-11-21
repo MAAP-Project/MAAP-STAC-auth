@@ -223,7 +223,7 @@ class AuthStack(Stack):
                     actions=["kms:Decrypt", "kms:DescribeKey"],
                     effect=iam.Effect.ALLOW,
                     resources=["*"],
-                    principals=[iam.ArnPrincipal(f"arn:aws:iam::{Stack.of(self).account}:role/MAAP-ADE-K8S")],
+                    principals=[iam.ArnPrincipal("arn:aws:iam::884094767067:role/MAAP-ADE-K8S")],
                 )
             ]
         )
