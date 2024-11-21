@@ -2,9 +2,9 @@ import json
 from enum import Enum
 from typing import Any, Dict, Optional, Sequence
 
-
 from aws_cdk import (
     aws_iam as iam,
+    aws_kms as kms,
     aws_cognito as cognito,
     aws_cognito_identitypool_alpha as cognito_id_pool,
     aws_s3 as s3,
@@ -70,7 +70,7 @@ class AuthStack(Stack):
         )
         CfnOutput(
             self,
-            f"identitypool_client_id",
+            "identitypool_client_id",
             export_name=f"{stack_name}-client-id",
             value=auth_provider_client.user_pool_client_id,
         )
@@ -171,6 +171,89 @@ class AuthStack(Stack):
         return describe_cognito_user_pool_client.get_response_field(
             "UserPoolClient.ClientSecret"
         )
+    
+    def _create_policy(self) -> iam.PolicyDocument:
+        """
+        Create a policy for the KMS key to restrict access to the service.
+        """
+        return iam.PolicyDocument(
+            statements=[
+                iam.PolicyStatement(
+                    actions=[
+                        "kms:Encrypt",
+                        "kms:Decrypt",
+                        "kms:ReEncrypt*",
+                        "kms:CreateGrant",
+                        "kms:DescribeKey"
+                    ],
+                    effect=iam.Effect.ALLOW,
+                    resources=["*"],
+                    principals=[iam.ArnPrincipal("*")],
+                    conditions={
+                    "StringEquals": {
+                        "kms:CallerAccount": Stack.of(self).account,
+                        "kms:ViaService": f"secretsmanager.{Stack.of(self).region}.amazonaws.com",
+                    }
+                    },
+                ),
+                iam.PolicyStatement(
+                    actions=["kms:GenerateDataKey*"],
+                    effect=iam.Effect.ALLOW,
+                    resources=["*"],
+                    principals=[iam.ArnPrincipal("*")],
+                    conditions={
+                    "StringEquals": {
+                        "kms:CallerAccount": Stack.of(self).account,
+                        "kms:ViaService": "secretsmanager.*.amazonaws.com",
+                    }
+                    },
+                ),
+                iam.PolicyStatement(
+                    actions=[
+                        "kms:Describe*",
+                        "kms:Get*",
+                        "kms:List*",
+                        "kms:RevokeGrant"
+                    ],
+                    effect=iam.Effect.ALLOW,
+                    resources=["*"],
+                    principals=[iam.ArnPrincipal(f"arn:aws:iam::{Stack.of(self).account}:root")],
+                ),
+                iam.PolicyStatement(
+                    actions=["kms:Decrypt", "kms:DescribeKey"],
+                    effect=iam.Effect.ALLOW,
+                    resources=["*"],
+                    principals=[iam.ArnPrincipal(f"arn:aws:iam::{Stack.of(self).account}:role/MAAP-ADE-K8S")],
+                )
+            ]
+        )
+
+    def _create_kms_key(self, service_id: str) -> kms.Key:
+        """
+        Create a KMS key for encrypting secrets similar to aws/secretsmanager
+        """
+        key = kms.Key(
+            self,
+            f"{service_id}-kms-key",
+            alias="maap/stac-auth",
+            description="Custom KMS Key for MAAP Secrets",
+            enabled=True,
+            policy=self._create_policy(),
+            key_spec=kms.KeySpec.SYMMETRIC_DEFAULT,
+            key_usage=kms.KeyUsage.ENCRYPT_DECRYPT,
+            removal_policy=RemovalPolicy.DESTROY,
+            multi_region=True,
+            enable_key_rotation=True,
+        )
+
+        CfnOutput(
+            self,
+            f"{service_id}-kms-key-id",
+            export_name="maap-stac-auth-key",
+            value=key.key_id,
+        )
+
+        return key
 
     def _create_secret(
         self,
@@ -189,9 +272,7 @@ class AuthStack(Stack):
             f"{service_id}-secret",
             secret_name=f"{stack_name}/{service_id}",
             description="Client secret, created by MAAP Auth CDK.",
-            # TODO: Should we not do this? Perhaps the client secret should be placed in
-            # a secret in a Lambda custom resource so as to avoid placing the secret in
-            # CloudFormation template.
+            encryption_key=self._create_kms_key(service_id),
             secret_string_value=SecretValue.unsafe_plain_text(json.dumps(secret_dict)),
             replica_regions=[{"region": region} for region in replica_regions or []],
         )
