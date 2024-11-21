@@ -276,6 +276,14 @@ class AuthStack(Stack):
             secret_string_value=SecretValue.unsafe_plain_text(json.dumps(secret_dict)),
             replica_regions=[{"region": region} for region in replica_regions or []],
         )
+        secret.add_to_resource_policy(
+            iam.PolicyStatement(
+                actions=["secretsmanager:GetSecretValue"],
+                effect=iam.Effect.ALLOW,
+                resources=[secret.secret_arn],
+                principals=[iam.ArnPrincipal("arn:aws:iam::884094767067:role/MAAP-ADE-K8S")],
+            )
+        )
 
         CfnOutput(
             self,
