@@ -24,8 +24,9 @@ class BucketPermissions(str, Enum):
 
 
 class AuthStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, ade_iam_role: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        self.ade_iam_role = ade_iam_role
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
         auth_provider_client = self.add_user_client(
@@ -223,7 +224,7 @@ class AuthStack(Stack):
                     actions=["kms:Decrypt", "kms:DescribeKey"],
                     effect=iam.Effect.ALLOW,
                     resources=["*"],
-                    principals=[iam.ArnPrincipal("arn:aws:iam::884094767067:role/MAAP-ADE-K8S")],
+                    principals=[iam.ArnPrincipal(self.ade_iam_role)],
                 )
             ]
         )
@@ -281,7 +282,7 @@ class AuthStack(Stack):
                 actions=["secretsmanager:GetSecretValue"],
                 effect=iam.Effect.ALLOW,
                 resources=[secret.secret_arn],
-                principals=[iam.ArnPrincipal("arn:aws:iam::884094767067:role/MAAP-ADE-K8S")],
+                principals=[iam.ArnPrincipal(self.ade_iam_role)],
             )
         )
 

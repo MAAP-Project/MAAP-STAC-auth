@@ -32,3 +32,11 @@ class Config(pydantic.BaseSettings):
         ),
         default_factory=getuser,
     )
+    ade_iam_role: str = pydantic.Field(
+        description=" ".join(
+            [
+                "ARN of the ADE IAM role allowed to retrieve secrets",
+                "Example: arn:aws:iam::123456789012:role/MyRole",
+            ]
+        ),
+    )
