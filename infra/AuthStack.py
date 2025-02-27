@@ -9,6 +9,7 @@ from aws_cdk import (
     aws_cognito_identitypool_alpha as cognito_id_pool,
     aws_s3 as s3,
     aws_secretsmanager as secretsmanager,
+    aws_ssm as ssm,
     CfnOutput,
     custom_resources as cr,
     RemovalPolicy,
@@ -382,7 +383,7 @@ class AuthStack(Stack):
             disable_o_auth=False,
         )
 
-        self._create_secret(
+        secret = self._create_secret(
             service_id,
             {
                 "flow": "client_credentials",
@@ -392,6 +393,15 @@ class AuthStack(Stack):
                 "scope": " ".join(scope.scope_name for scope in scopes),
             },
             replica_regions,
+        )
+
+        ssm.StringParameter(
+            self,
+            "secret-parameter",
+            parameter_name=f"/{service_id}/secret",
+            string_value=secret.secret_arn,
+            description=f"ARN of the secret containing credentials for {service_id} service client",
+            tier=ssm.ParameterTier.STANDARD,
         )
 
         return client
