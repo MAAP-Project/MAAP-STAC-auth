@@ -32,6 +32,7 @@ class AuthStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
+        self.kms_key = self._create_kms_key("stac-auth")
         auth_provider_client = self.add_user_client(
             "cognito-identity-pool-auth-provider",
             name="Identity Pool Authentication Provider",
