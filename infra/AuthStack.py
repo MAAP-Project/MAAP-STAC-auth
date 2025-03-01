@@ -32,6 +32,7 @@ class AuthStack(Stack):
         self.ade_iam_role = ade_iam_role
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
+        self.kms_key = self._create_kms_key("stac-auth")
         auth_provider_client = self.add_user_client(
             "cognito-identity-pool-auth-provider",
             name="Identity Pool Authentication Provider",
@@ -279,7 +280,7 @@ class AuthStack(Stack):
             f"{service_id}-secret",
             secret_name=f"{stack_name}/{service_id}",
             description="Client secret, created by MAAP Auth CDK.",
-            encryption_key=self._create_kms_key(service_id),
+            encryption_key=self.kms_key,
             secret_string_value=SecretValue.unsafe_plain_text(json.dumps(secret_dict)),
             replica_regions=[{"region": region} for region in replica_regions or []],
         )
