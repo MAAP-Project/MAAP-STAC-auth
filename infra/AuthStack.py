@@ -3,18 +3,18 @@ from enum import Enum
 from typing import Any, Dict, Optional, Sequence
 
 from aws_cdk import (
-    aws_iam as iam,
-    aws_kms as kms,
-    aws_cognito as cognito,
-    aws_cognito_identitypool_alpha as cognito_id_pool,
-    aws_s3 as s3,
-    aws_secretsmanager as secretsmanager,
-    aws_ssm as ssm,
     CfnOutput,
-    custom_resources as cr,
     RemovalPolicy,
     SecretValue,
     Stack,
+    aws_cognito as cognito,
+    aws_cognito_identitypool_alpha as cognito_id_pool,
+    aws_iam as iam,
+    aws_kms as kms,
+    aws_s3 as s3,
+    aws_secretsmanager as secretsmanager,
+    aws_ssm as ssm,
+    custom_resources as cr,
 )
 from constructs import Construct
 
@@ -25,7 +25,9 @@ class BucketPermissions(str, Enum):
 
 
 class AuthStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, ade_iam_role: str, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, construct_id: str, ade_iam_role: str, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
         self.ade_iam_role = ade_iam_role
         self.userpool = self._create_userpool()
@@ -78,7 +80,6 @@ class AuthStack(Stack):
         )
 
     def _create_userpool(self) -> cognito.UserPool:
-
         return cognito.UserPool(
             self,
             "userpool",
@@ -97,7 +98,6 @@ class AuthStack(Stack):
         userpool: cognito.UserPool,
         auth_provider_client: cognito.UserPoolClient,
     ) -> cognito_id_pool.IdentityPool:
-
         userpool_provider = cognito_id_pool.UserPoolAuthenticationProvider(
             user_pool=userpool,
             user_pool_client=auth_provider_client,
@@ -115,7 +115,8 @@ class AuthStack(Stack):
             role_mappings=[
                 cognito_id_pool.IdentityPoolRoleMapping(
                     provider_url=cognito_id_pool.IdentityPoolProviderUrl.user_pool(
-                        f"cognito-idp.{stack.region}.{stack.url_suffix}/{userpool.user_pool_id}:{auth_provider_client.user_pool_client_id}"
+                        f"cognito-idp.{stack.region}.{stack.url_suffix}/"
+                        f"{userpool.user_pool_id}:{auth_provider_client.user_pool_client_id}"
                     ),
                     use_token=True,
                     mapping_key="userpool",
@@ -132,7 +133,9 @@ class AuthStack(Stack):
 
         domain = userpool.add_domain(
             "cognito-domain",
-            cognito_domain=cognito.CognitoDomainOptions(domain_prefix=stack_name.lower()),
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix=stack_name.lower()
+            ),
         )
 
         CfnOutput(
@@ -148,7 +151,6 @@ class AuthStack(Stack):
         self,
         client: cognito.UserPoolClient,
     ) -> str:
-
         describe_cognito_user_pool_client = cr.AwsCustomResource(
             self,
             f"describe-{client.to_string()}",
@@ -173,7 +175,7 @@ class AuthStack(Stack):
         return describe_cognito_user_pool_client.get_response_field(
             "UserPoolClient.ClientSecret"
         )
-    
+
     def _create_policy(self) -> iam.PolicyDocument:
         """
         Create a policy for the KMS key to restrict access to the service.
@@ -186,16 +188,17 @@ class AuthStack(Stack):
                         "kms:Decrypt",
                         "kms:ReEncrypt*",
                         "kms:CreateGrant",
-                        "kms:DescribeKey"
+                        "kms:DescribeKey",
                     ],
                     effect=iam.Effect.ALLOW,
                     resources=["*"],
                     principals=[iam.ArnPrincipal("*")],
                     conditions={
-                    "StringEquals": {
-                        "kms:CallerAccount": Stack.of(self).account,
-                        "kms:ViaService": f"secretsmanager.{Stack.of(self).region}.amazonaws.com",
-                    }
+                        "StringEquals": {
+                            "kms:CallerAccount": Stack.of(self).account,
+                            "kms:ViaService": f"secretsmanager.{Stack.of(self).region}."
+                            "amazonaws.com",
+                        }
                     },
                 ),
                 iam.PolicyStatement(
@@ -204,10 +207,10 @@ class AuthStack(Stack):
                     resources=["*"],
                     principals=[iam.ArnPrincipal("*")],
                     conditions={
-                    "StringEquals": {
-                        "kms:CallerAccount": Stack.of(self).account,
-                        "kms:ViaService": "secretsmanager.*.amazonaws.com",
-                    }
+                        "StringEquals": {
+                            "kms:CallerAccount": Stack.of(self).account,
+                            "kms:ViaService": "secretsmanager.*.amazonaws.com",
+                        }
                     },
                 ),
                 iam.PolicyStatement(
@@ -215,18 +218,20 @@ class AuthStack(Stack):
                         "kms:Describe*",
                         "kms:Get*",
                         "kms:List*",
-                        "kms:RevokeGrant"
+                        "kms:RevokeGrant",
                     ],
                     effect=iam.Effect.ALLOW,
                     resources=["*"],
-                    principals=[iam.ArnPrincipal(f"arn:aws:iam::{Stack.of(self).account}:root")],
+                    principals=[
+                        iam.ArnPrincipal(f"arn:aws:iam::{Stack.of(self).account}:root")
+                    ],
                 ),
                 iam.PolicyStatement(
                     actions=["kms:Decrypt", "kms:DescribeKey"],
                     effect=iam.Effect.ALLOW,
                     resources=["*"],
                     principals=[iam.ArnPrincipal(self.ade_iam_role)],
-                )
+                ),
             ]
         )
 
@@ -341,7 +346,6 @@ class AuthStack(Stack):
         name: Optional[str] = None,
         replica_regions: Optional[Sequence[str]] = None,
     ) -> cognito.UserPoolClient:
-
         client = self.userpool.add_client(
             service_id,
             auth_flows=cognito.AuthFlow(user_password=True),
@@ -400,7 +404,8 @@ class AuthStack(Stack):
             "secret-parameter",
             parameter_name=f"/{service_id}/secret",
             string_value=secret.secret_arn,
-            description=f"ARN of the secret containing credentials for {service_id} service client",
+            description=f"ARN of the secret containing credentials for {service_id} "
+            "service client",
             tier=ssm.ParameterTier.STANDARD,
         )
 
@@ -422,7 +427,7 @@ class AuthStack(Stack):
         description: str,
         bucket_permissions: Dict[str, BucketPermissions],
     ) -> cognito.CfnUserPoolGroup:
-
+        identity_pool_id = self.identitypool.identity_pool_id
         role = iam.Role(
             self,
             f"{group_name}_role",
@@ -431,7 +436,7 @@ class AuthStack(Stack):
                 assume_role_action="sts:AssumeRoleWithWebIdentity",
                 conditions={
                     "StringEquals": {
-                        "cognito-identity.amazonaws.com:aud": self.identitypool.identity_pool_id
+                        "cognito-identity.amazonaws.com:aud": identity_pool_id
                     }
                 },
             ),
