@@ -3,9 +3,9 @@ import os
 
 import aws_cdk as cdk
 
+from config import Config
 from infra.AuthStack import AuthStack
 from infra.RolesStack import RolesStack
-from config import Config
 
 config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
 
@@ -58,7 +58,7 @@ auth_stac = RolesStack(
         "Owner": config.owner,
         "Client": "NASA",
         "Stack": config.stage,
-    }
+    },
 )
 
 app.synth()
