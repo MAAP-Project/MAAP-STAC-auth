@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 import json
-from typing import TYPE_CHECKING
 
 import boto3
 import pydantic
 import requests
-
-if TYPE_CHECKING:
-    pass
 
 
 def get_token(config: "CognitoClientDetails") -> "Creds":
