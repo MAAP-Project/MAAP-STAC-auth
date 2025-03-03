@@ -9,7 +9,7 @@ from constructs import Construct
 DATA_PIPELINE_LAMBDA_EXECUTION_ROLE_PATTERN = (
     "maap-data-pipelines-*-datapipelinelambdarole*"
 )
-STAC_INGESTOR_EXECUTION_ROLE_PATTERN = "stacingestor"
+STAC_INGESTOR_EXECUTION_ROLE_PATTERN = "MAAP-STAC-*-pgSTAC-stacingestor*"
 
 
 class RolesStack(Stack):
