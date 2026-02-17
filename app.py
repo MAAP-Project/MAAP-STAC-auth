@@ -13,7 +13,6 @@ app = cdk.App()
 auth_stac = AuthStack(
     app,
     f"MAAP-STAC-auth-{config.stage}",
-    ade_iam_role=config.ade_iam_role,
     tags={
         "Project": "MAAP",
         "Owner": config.owner,
