@@ -2,7 +2,6 @@ import json
 from enum import Enum
 from typing import Any, Dict, Optional, Sequence
 
-
 from aws_cdk import (
     CfnOutput,
     RemovalPolicy,
@@ -11,7 +10,6 @@ from aws_cdk import (
     aws_cognito as cognito,
     aws_cognito_identitypool_alpha as cognito_id_pool,
     aws_iam as iam,
-    aws_kms as kms,
     aws_s3 as s3,
     aws_secretsmanager as secretsmanager,
     aws_ssm as ssm,
@@ -27,12 +25,11 @@ class BucketPermissions(str, Enum):
 
 class AuthStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, ade_iam_role: str, **kwargs
+        self, scope: Construct, construct_id: str, **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
-        self.kms_key = self._create_kms_key("stac-auth")
         auth_provider_client = self.add_user_client(
             "cognito-identity-pool-auth-provider",
             name="Identity Pool Authentication Provider",

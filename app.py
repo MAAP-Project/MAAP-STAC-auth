@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import os
-
 import aws_cdk as cdk
 
 from config import Config
 from infra.AuthStack import AuthStack
 from infra.RolesStack import RolesStack
 
-config = Config(_env_file=os.environ.get("ENV_FILE", ".env"))
+config = Config()
 
 app = cdk.App()
 auth_stac = AuthStack(

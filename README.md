@@ -10,7 +10,6 @@ Note : Managing cognito users should be done via the console.
 
 - `docker` is running
 - the AWS CDK CLI is installed
-- verify the configuration in `.env`.
 - [`uv`](https://docs.astral.sh/uv/) is installed
 
 ### Installation
@@ -19,10 +18,16 @@ Note : Managing cognito users should be done via the console.
 uv sync
 ```
 
-Run :
+Locally Run Synthesis:
+```bash
+# Set environment variables for local testing
+export STAGE=dev
+export OWNER=myname
+export STAC_REGISTER_SERVICE_ID=my-service-id
 
-- `uv run cdk synth --all`
-- `uv run cdk deploy --all`
+# Test the CDK synthesis locally
+uv run cdk synth --all
+```
 
 ## Cognito resources
 
