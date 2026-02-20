@@ -24,9 +24,7 @@ class BucketPermissions(str, Enum):
 
 
 class AuthStack(Stack):
-    def __init__(
-        self, scope: Construct, construct_id: str, **kwargs
-    ) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         self.userpool = self._create_userpool()
         self.domain = self._add_domain(self.userpool)
@@ -72,7 +70,7 @@ class AuthStack(Stack):
         )
         CfnOutput(
             self,
-            f"identitypool_client_id",
+            "identitypool_client_id",
             export_name=f"{stack_name}-client-id",
             value=auth_provider_client.user_pool_client_id,
         )
