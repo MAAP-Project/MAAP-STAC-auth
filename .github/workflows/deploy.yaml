@@ -24,6 +24,7 @@ on:
       aws_region:
         description: 'AWS Region'
         required: true
+        default: 'us-west-2'
         type: choice
         options:
           - us-west-2
