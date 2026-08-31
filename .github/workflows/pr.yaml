@@ -1,37 +1,20 @@
-name: Deploy MAAP STAC Auth
+name: Pull Request Workflow
 
 permissions:
   id-token: write
   contents: read
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      stage:
-        description: 'Deployment stage'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - test
-      aws_region:
-        description: 'AWS Region'
-        required: true
-        default: 'us-west-2'
-        type: choice
-        options:
-          - us-west-2
-          - us-east-1
 
 jobs:
-  deploy:
+  validate:
+    if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
     env:
-      STAGE: ${{ inputs.stage || 'dev'}}
+      STAGE: test
       OWNER: ${{ github.actor }}
       STAC_REGISTER_SERVICE_ID: ${{ vars.STAC_REGISTER_SERVICE_ID }}
 
@@ -49,11 +32,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ vars.DEPLOY_ROLE }}
-          aws-region: ${{ inputs.aws_region || vars.AWS_REGION }}
+          aws-region: us-west-2
 
       - name: CDK Synth
         run: uv run npx cdk synth
-
-      - name: CDK Deploy
-        if: github.event_name == 'workflow_dispatch'
-        run: uv run npx cdk deploy --require-approval never --all

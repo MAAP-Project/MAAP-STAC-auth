@@ -8,6 +8,10 @@ __pycache__/
 cdk.out/
 
 # Environment files
+.venv
 .env
 .env.local
 .env.*.local
+
+.DS_Store
+.*cache
