@@ -2,19 +2,18 @@ import json
 from enum import Enum
 from typing import Any, Dict, Optional, Sequence
 
-
 from aws_cdk import (
-    aws_iam as iam,
-    aws_cognito as cognito,
-    aws_cognito_identitypool_alpha as cognito_id_pool,
-    aws_s3 as s3,
-    aws_secretsmanager as secretsmanager,
-    aws_ssm as ssm,
     CfnOutput,
-    custom_resources as cr,
     RemovalPolicy,
     SecretValue,
     Stack,
+    aws_cognito as cognito,
+    aws_cognito_identitypool_alpha as cognito_id_pool,
+    aws_iam as iam,
+    aws_s3 as s3,
+    aws_secretsmanager as secretsmanager,
+    aws_ssm as ssm,
+    custom_resources as cr,
 )
 from constructs import Construct
 
@@ -71,13 +70,12 @@ class AuthStack(Stack):
         )
         CfnOutput(
             self,
-            f"identitypool_client_id",
+            "identitypool_client_id",
             export_name=f"{stack_name}-client-id",
             value=auth_provider_client.user_pool_client_id,
         )
 
     def _create_userpool(self) -> cognito.UserPool:
-
         return cognito.UserPool(
             self,
             "userpool",
@@ -96,7 +94,6 @@ class AuthStack(Stack):
         userpool: cognito.UserPool,
         auth_provider_client: cognito.UserPoolClient,
     ) -> cognito_id_pool.IdentityPool:
-
         userpool_provider = cognito_id_pool.UserPoolAuthenticationProvider(
             user_pool=userpool,
             user_pool_client=auth_provider_client,
@@ -114,7 +111,8 @@ class AuthStack(Stack):
             role_mappings=[
                 cognito_id_pool.IdentityPoolRoleMapping(
                     provider_url=cognito_id_pool.IdentityPoolProviderUrl.user_pool(
-                        f"cognito-idp.{stack.region}.{stack.url_suffix}/{userpool.user_pool_id}:{auth_provider_client.user_pool_client_id}"
+                        f"cognito-idp.{stack.region}.{stack.url_suffix}/"
+                        f"{userpool.user_pool_id}:{auth_provider_client.user_pool_client_id}"
                     ),
                     use_token=True,
                     mapping_key="userpool",
@@ -131,7 +129,9 @@ class AuthStack(Stack):
 
         domain = userpool.add_domain(
             "cognito-domain",
-            cognito_domain=cognito.CognitoDomainOptions(domain_prefix=stack_name.lower()),
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix=stack_name.lower()
+            ),
         )
 
         CfnOutput(
@@ -147,7 +147,6 @@ class AuthStack(Stack):
         self,
         client: cognito.UserPoolClient,
     ) -> str:
-
         describe_cognito_user_pool_client = cr.AwsCustomResource(
             self,
             f"describe-{client.to_string()}",
@@ -251,7 +250,6 @@ class AuthStack(Stack):
         name: Optional[str] = None,
         replica_regions: Optional[Sequence[str]] = None,
     ) -> cognito.UserPoolClient:
-
         client = self.userpool.add_client(
             service_id,
             auth_flows=cognito.AuthFlow(user_password=True),
@@ -310,7 +308,8 @@ class AuthStack(Stack):
             "secret-parameter",
             parameter_name=f"/{service_id}/secret",
             string_value=secret.secret_arn,
-            description=f"ARN of the secret containing credentials for {service_id} service client",
+            description=f"ARN of the secret containing credentials for {service_id} "
+            "service client",
             tier=ssm.ParameterTier.STANDARD,
         )
 
@@ -332,7 +331,7 @@ class AuthStack(Stack):
         description: str,
         bucket_permissions: Dict[str, BucketPermissions],
     ) -> cognito.CfnUserPoolGroup:
-
+        identity_pool_id = self.identitypool.identity_pool_id
         role = iam.Role(
             self,
             f"{group_name}_role",
@@ -341,7 +340,7 @@ class AuthStack(Stack):
                 assume_role_action="sts:AssumeRoleWithWebIdentity",
                 conditions={
                     "StringEquals": {
-                        "cognito-identity.amazonaws.com:aud": self.identitypool.identity_pool_id
+                        "cognito-identity.amazonaws.com:aud": identity_pool_id
                     }
                 },
             ),

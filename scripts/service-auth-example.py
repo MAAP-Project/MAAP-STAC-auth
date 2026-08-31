@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
 import json
-from typing import TYPE_CHECKING
 
 import boto3
 import pydantic
 import requests
-
-
-if TYPE_CHECKING:
-    from mypy_boto3_cognito_idp.client import CognitoIdentityProviderClient
-    from mypy_boto3_cognito_identity.client import CognitoIdentityClient
-    from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
 
 
 def get_token(config: "CognitoClientDetails") -> "Creds":
@@ -22,7 +15,7 @@ def get_token(config: "CognitoClientDetails") -> "Creds":
         auth=(config.client_id, config.client_secret),
         data={
             "grant_type": "client_credentials",
-            # A space-separated list of scopes to request for the generated access token.
+            # A space-separated list of scopes to request for the generated access token
             "scope": config.scope,
         },
     )
@@ -63,20 +56,21 @@ class Settings(pydantic.BaseSettings):
         except client.exceptions.ResourceNotFoundException:
             raise Exception(
                 f"Unable to find a secret for '{secret_id}'. "
-                "\n\nHint: Check your stage and service id. Also, verify that the correct "
-                "AWS_PROFILE is set on your environment."
+                "\n\nHint: Check your stage and service id. Also, verify that the "
+                "correct AWS_PROFILE is set on your environment."
             )
         return CognitoClientDetails.parse_obj(json.loads(response["SecretString"]))
 
 
 if __name__ == "__main__":
-    
-    
     import os
+
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
-    os.chdir('../')
-    client_details = Settings(_env_file=os.environ.get("ENV_FILE", ".env")).get_cognito_service_details()
+    os.chdir("../")
+    client_details = Settings(
+        _env_file=os.environ.get("ENV_FILE", ".env")
+    ).get_cognito_service_details()
     credentials = get_token(client_details)
     print(credentials.json())

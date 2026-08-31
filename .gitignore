@@ -1,0 +1,13 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# AWS CDK
+cdk.out/
+
+# Environment files
+.env
+.env.local
+.env.*.local

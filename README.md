@@ -10,11 +10,24 @@ Note : Managing cognito users should be done via the console.
 
 - `docker` is running
 - the AWS CDK CLI is installed
-- verify the configuration in `.env`. 
+- [`uv`](https://docs.astral.sh/uv/) is installed
 
-Run : 
-- `cdk synth --all`
-- `cdk deploy --all`
+### Installation
+
+```bash
+uv sync
+```
+
+Locally Run Synthesis:
+```bash
+# Set environment variables for local testing
+export STAGE=dev
+export OWNER=myname
+export STAC_REGISTER_SERVICE_ID=my-service-id
+
+# Test the CDK synthesis locally
+uv run cdk synth --all
+```
 
 ## Cognito resources
 
@@ -23,8 +36,7 @@ Run :
 This example script provides you with credentials based on service authentication.
 
 ```bash
-python3 -m pip install -r requirements.txt
-python3 scripts/service-auth-example.py
+uv run scripts/service-auth-example.py
 ```
 
 ### Expanding
