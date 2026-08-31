@@ -34,5 +34,5 @@ jobs:
           role-to-assume: ${{ vars.DEPLOY_ROLE }}
           aws-region: us-west-2
 
-      - name: CDK Synth
+      - name: CDK Diff
         run: uv run npx cdk diff --ci
