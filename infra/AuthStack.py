@@ -1,6 +1,7 @@
 import json
-from enum import Enum
-from typing import Any, Dict, Optional, Sequence
+from collections.abc import Sequence
+from enum import StrEnum
+from typing import Any
 
 from aws_cdk import (
     CfnOutput,
@@ -18,7 +19,7 @@ from aws_cdk import (
 from constructs import Construct
 
 
-class BucketPermissions(str, Enum):
+class BucketPermissions(StrEnum):
     read_only = "r"
     read_write = "wr"
 
@@ -175,8 +176,8 @@ class AuthStack(Stack):
     def _create_secret(
         self,
         service_id: str,
-        secret_dict: Dict[Any, Any],
-        replica_regions: Optional[Sequence[str]] = None,
+        secret_dict: dict[Any, Any],
+        replica_regions: Sequence[str] | None = None,
     ):
         """
         Create a secret to represent service credentials.
@@ -214,8 +215,8 @@ class AuthStack(Stack):
     def add_resource_server(
         self,
         resource_id: str,
-        supported_scopes: Dict[str, str],
-    ) -> Dict[str, cognito.OAuthScope]:
+        supported_scopes: dict[str, str],
+    ) -> dict[str, cognito.OAuthScope]:
         """
         The resource server represents something that a client would like to be able to
         access. Each scope represents a resource/action granted to an application.
@@ -247,8 +248,8 @@ class AuthStack(Stack):
     def add_user_client(
         self,
         service_id: str,
-        name: Optional[str] = None,
-        replica_regions: Optional[Sequence[str]] = None,
+        name: str | None = None,
+        replica_regions: Sequence[str] | None = None,
     ) -> cognito.UserPoolClient:
         client = self.userpool.add_client(
             service_id,
@@ -273,7 +274,7 @@ class AuthStack(Stack):
         self,
         service_id: str,
         scopes: Sequence[cognito.OAuthScope],
-        replica_regions: Optional[Sequence[str]] = None,
+        replica_regions: Sequence[str] | None = None,
     ) -> cognito.UserPoolClient:
         """
         Adds a client to the user pool that represents a service (ie not individual
@@ -329,7 +330,7 @@ class AuthStack(Stack):
         self,
         group_name: str,
         description: str,
-        bucket_permissions: Dict[str, BucketPermissions],
+        bucket_permissions: dict[str, BucketPermissions],
     ) -> cognito.CfnUserPoolGroup:
         identity_pool_id = self.identitypool.identity_pool_id
         role = iam.Role(

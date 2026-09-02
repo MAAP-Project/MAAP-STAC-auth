@@ -1,10 +1,11 @@
 from getpass import getuser
 
-import pydantic
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
-class Config(pydantic.BaseSettings):
-    stage: str = pydantic.Field(
+class Config(BaseSettings):
+    stage: str = Field(
         description=" ".join(
             [
                 "Stage of deployment (e.g. 'dev', 'prod').",
@@ -14,7 +15,7 @@ class Config(pydantic.BaseSettings):
         ),
         default_factory=getuser,
     )
-    stac_register_service_id: str = pydantic.Field(
+    stac_register_service_id: str = Field(
         description=" ".join(
             [
                 "name of the service id with the stack:register scope.",
@@ -22,7 +23,7 @@ class Config(pydantic.BaseSettings):
         ),
         default_factory=getuser,
     )
-    owner: str = pydantic.Field(
+    owner: str = Field(
         description=" ".join(
             [
                 "Name of primary contact for Cloudformation Stack.",

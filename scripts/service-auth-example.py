@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import json
+from pathlib import Path
 
 import boto3
 import pydantic
 import requests
+from pydantic_settings import BaseSettings
 
 
 def get_token(config: "CognitoClientDetails") -> "Creds":
@@ -40,7 +42,7 @@ class Creds(pydantic.BaseModel):
     token_type: str
 
 
-class Settings(pydantic.BaseSettings):
+class Settings(BaseSettings):
     stage: str
     stac_register_service_id: str
 
@@ -53,22 +55,20 @@ class Settings(pydantic.BaseSettings):
         secret_id = f"{self.stack_name}/{self.stac_register_service_id}"
         try:
             response = client.get_secret_value(SecretId=secret_id)
-        except client.exceptions.ResourceNotFoundException:
+        except client.exceptions.ResourceNotFoundException as e:
             raise Exception(
                 f"Unable to find a secret for '{secret_id}'. "
                 "\n\nHint: Check your stage and service id. Also, verify that the "
                 "correct AWS_PROFILE is set on your environment."
-            )
+            ) from e
         return CognitoClientDetails.parse_obj(json.loads(response["SecretString"]))
 
 
 if __name__ == "__main__":
     import os
 
-    abspath = os.path.abspath(__file__)
-    dname = os.path.dirname(abspath)
-    os.chdir(dname)
-    os.chdir("../")
+    target_dir = Path(__file__).resolve().parent.parent
+    os.chdir(target_dir)
     client_details = Settings(
         _env_file=os.environ.get("ENV_FILE", ".env")
     ).get_cognito_service_details()

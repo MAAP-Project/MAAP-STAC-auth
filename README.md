@@ -2,32 +2,41 @@
 
 This codebase stores the IaC for authentication and common IAM roles used for the MAAP STAC infrastructure.
 
-Note : Managing cognito users should be done via the console.
+Note : Managing individual cognito users should be done via the console.
 
-## Deploying
+## Contributing
 
-### Requirements
+### 1. Prerequisites
 
-- `docker` is running
-- the AWS CDK CLI is installed
-- [`uv`](https://docs.astral.sh/uv/) is installed
+First, ensure you have [uv](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer) installed. You can install it using one of the official commands:
 
-### Installation
+* **pip:** Suggested: `pipx install uv` or `pip install uv`
+* **Homebrew:** `brew install uv`
+* **macOS/Linux:** `curl -LsSf https://astral.sh | sh`
+* **Windows:** `powershell -c "irm https://astral.sh | iex"`
 
-```bash
-uv sync
-```
+### 2. Development Setup
 
-Locally Run Synthesis:
-```bash
-# Set environment variables for local testing
-export STAGE=dev
-export OWNER=myname
-export STAC_REGISTER_SERVICE_ID=my-service-id
+1. **Fork and clone** the repository.
+2. **Install project dependencies** (this automatically sets up a virtual environment):
 
-# Test the CDK synthesis locally
-uv run cdk synth --all
-```
+   ```bash
+   uv sync
+   ```
+
+3. **Install the pre-commit hooks** so your code is automatically linted before every commit:
+
+   ```bash
+   uv run pre-commit install
+   ```
+
+### 3. Verification Commands
+
+* **Manually run lints across all files:**
+
+  ```bash
+  uv run pre-commit run --all-files
+  ```
 
 ## Cognito resources
 

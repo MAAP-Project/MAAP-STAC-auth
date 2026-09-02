@@ -8,9 +8,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       stage:
@@ -37,36 +34,26 @@ jobs:
       STAGE: ${{ inputs.stage || 'dev'}}
       OWNER: ${{ github.actor }}
       STAC_REGISTER_SERVICE_ID: ${{ vars.STAC_REGISTER_SERVICE_ID }}
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Install AWS CDK CLI
-        run: npm install -g aws-cdk
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ vars.DEPLOY_ROLE }}
           aws-region: ${{ inputs.aws_region || vars.AWS_REGION }}
 
       - name: CDK Synth
-        run: uv run cdk synth
+        run: uv run npx cdk synth
 
       - name: CDK Deploy
         if: github.event_name == 'workflow_dispatch'
-        run: uv run cdk deploy --require-approval never --all
+        run: uv run npx cdk deploy --require-approval never --all
