@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.4
+    rev: v0.16.5
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -28,7 +28,7 @@ repos:
         - "/tool/markdownlint-cli2"
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.5
+    rev: 0.12.8
     hooks:
       - id: uv-lock
 
@@ -38,5 +38,5 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-requests
-          - pydantic>=2.13.4
+          - pydantic>=2.13.5
           - pydantic-settings>=2.15.0
